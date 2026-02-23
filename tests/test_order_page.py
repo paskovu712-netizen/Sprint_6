@@ -21,18 +21,18 @@ class TestHomePage:
         cls.driver = webdriver.Firefox()
         #cls.driver = webdriver.Chrome()
 
-    def test_check_test_in_home_page(self):
+    def test_check_test_in_order_page(self):
         # перешли на страницу тестового приложения
-        self.driver.get('https://qa-scooter.praktikum-services.ru/')
+        self.driver.get('https://qa-scooter.praktikum-services.ru/order')
 
         # создай объект класса домашней страницы
         order_page = OrderPageScooter(self.driver)
 
         # дождись загрузки домашней страницы
-        order_page.wait_for_load_home_page()
+        order_page.wait_for_load_order_page()
 
         # получи текст элемента в заголовке
-        text_order_page = home_page.text_in_home_page()
+        text_order_page = order_page.text_in_order_page()
 
         # сделай проверку, что полученное значение совпадает c email
         assert 'Для кого самокат' in text_order_page

@@ -21,7 +21,7 @@ class TestHomePage:
         cls.driver = webdriver.Firefox()
         #cls.driver = webdriver.Chrome()
 
-    def test_check_email_in_header(self):
+    def test_check_test_in_home_page(self):
         # перешли на страницу тестового приложения
         self.driver.get('https://qa-scooter.praktikum-services.ru/')
 

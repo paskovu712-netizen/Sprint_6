@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-from pages.home_page  import HomePageScooter
+from pages.order_page  import OrderPageScooter
 
 # класс с автотестом
 class TestHomePage:
@@ -21,21 +21,21 @@ class TestHomePage:
         cls.driver = webdriver.Firefox()
         #cls.driver = webdriver.Chrome()
 
-    def test_check_email_in_header(self):
+    def test_check_test_in_home_page(self):
         # перешли на страницу тестового приложения
         self.driver.get('https://qa-scooter.praktikum-services.ru/')
 
         # создай объект класса домашней страницы
-        home_page = HomePageScooter(self.driver)
+        order_page = OrderPageScooter(self.driver)
 
         # дождись загрузки домашней страницы
-        home_page.wait_for_load_home_page()
+        order_page.wait_for_load_home_page()
 
         # получи текст элемента в заголовке
-        text_home_page = home_page.text_in_home_page()
+        text_order_page = home_page.text_in_home_page()
 
         # сделай проверку, что полученное значение совпадает c email
-        assert 'Самокат' in text_home_page
+        assert 'Для кого самокат' in text_order_page
 
     @classmethod
     def teardown_class(cls):

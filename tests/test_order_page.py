@@ -4,40 +4,76 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+import pytest
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-from pages.order_page  import OrderPageScooter
+from pages.order_page import OrderPage
 
-# класс с автотестом
-class TestHomePage:
+@pytest.fixture
+def driver():
+    driver = webdriver.Firefox()
+    yield driver
+    driver.quit()
 
-    driver = None
+# Наборы тестовых данных
+TEST_DATA_SET_1 = {
+    "name": "Иван",
+    "surname": "Петров",
+    "address": "ул. Ленина, д. 15",
+    "station": "Тверская",
+    "phone": "+79991234567",
+    "data": "01.04.2026",
+    "duration": "сутки"
+}
 
-    @classmethod
-    def setup_class(cls):
-        # создали драйвер для браузера Firefox
-        cls.driver = webdriver.Firefox()
-        #cls.driver = webdriver.Chrome()
+TEST_DATA_SET_2 = {
+    "name": "Мария",
+    "surname": "Сидорова",
+    "address": "пр. Мира, д. 42",
+    "station": "Курская",
+    "phone": "+79167654321",
+    "data": "01.04.2026",
+    "duration": "сутки"
+}
 
-    def test_check_test_in_order_page(self):
-        # перешли на страницу тестового приложения
-        self.driver.get('https://qa-scooter.praktikum-services.ru/order')
+@pytest.mark.parametrize("test_data, order_button_method", [
+    (TEST_DATA_SET_1, "click_order_button_top"),
+    (TEST_DATA_SET_2, "click_order_button_bottom")
+])
+def test_order_scooter(driver, test_data, order_button_method):
 
-        # создай объект класса домашней страницы
-        order_page = OrderPageScooter(self.driver)
+    page = OrderPage(driver)
+    page.open()
 
-        # дождись загрузки домашней страницы
-        order_page.wait_for_load_order_page()
+    # 1. Нажать кнопку «Заказать»
+    if order_button_method == "click_order_button_top":
+        page.click_order_button_top()
+    else:
+        page.click_order_button_bottom()
 
-        # получи текст элемента в заголовке
-        text_order_page = order_page.text_in_order_page()
+    # 2. Заполнить формы заказа
+    page.fill_order_form_for_whom(
+        test_data["name"],
+        test_data["surname"],
+        test_data["address"],
+        test_data["station"],
+        test_data["phone"]
+    )
 
-        # сделай проверку, что полученное значение совпадает c email
-        assert 'Для кого самокат' in text_order_page
+    page.fill_order_form_rent(
+        test_data["data"],
+        test_data["duration"],
+    )
 
-    @classmethod
-    def teardown_class(cls):
-        # Закрой браузер
-        cls.driver.quit()
+    page.answer_order_question()
+
+    # 3. Проверить сообщение об успешном создании заказа
+    assert page.is_success_message_displayed(), "Сообщение об успешном заказе не появилось"
+
+    # 4. Проверить переход на главную страницу при клике на логотип Самоката
+    page.click_scooter_logo()
+    assert "qa-scooter.praktikum-services.ru" in page.get_current_url(), "Не перешли на главную страницу Самоката"
+
+    # 5. Проверить открытие Дзена при клике на логотип Яндекса
+    page.click_yandex_logo()
+    page.switch_to_new_window()
+    assert "dzen.ru" in page.get_current_url(), "Не открылся Дзен в новом окне"

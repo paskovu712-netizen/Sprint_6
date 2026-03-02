@@ -3,21 +3,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import allure
+from pages.base_page import BasePage
+from curl import BASE_URL
 
-class OrderPage:
-    def __init__(self, driver):
-        self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
+class OrderPage(BasePage):
 
     @allure.step("Открытие главной страницы Яндекс Самоката")
-    def open(self):
-        # Открывает главную страницу Яндекс Самоката
-        self.driver.get("https://qa-scooter.praktikum-services.ru/")
+    def open_main_page(self):
+        self.open(BASE_URL)
 
     # Локаторы элементов
     ORDER_BUTTON_TOP = (By.CLASS_NAME, "Button_Button__ra12g")
     ORDER_BUTTON_BOTTOM = (By.XPATH, ".//button[text()='Заказать']")
-    ORDER_BUTTON_MIDDLE = (By.CSS_SELECTOR, "button.Button_Middle__1CSJM:nth-child(2)")
+    ORDER_BUTTON_MIDDLE = (By.XPATH, ".//button[text()='Заказать'and @class='Button_Button__ra12g Button_Middle__1CSJM']")
     LOGO_SCOOTER = (By.CSS_SELECTOR, "a.Header_LogoScooter__3lsAR")
     LOGO_YANDEX = (By.CSS_SELECTOR, ".Header_LogoYandex__3TSOI")
     NAME_FIELD = (By.XPATH, "//input[@placeholder='* Имя']")
@@ -38,68 +36,49 @@ class OrderPage:
     def click_order_button_top(self):
         # Нажимает кнопку «Заказать» вверху страницы
         self.driver.execute_script("document.body.style.zoom='50%'")
-        button = self.wait.until(EC.element_to_be_clickable(self.ORDER_BUTTON_TOP))
-        button.click()
+        self.click(self.ORDER_BUTTON_TOP)
 
     @allure.step("Нажатие кнопки «Заказать» внизу страницы")
     def click_order_button_bottom(self):
         # Нажимает кнопку «Заказать» внизу страницы
         self.driver.execute_script("document.body.style.zoom='50%'")
-        button = self.wait.until(EC.element_to_be_clickable(self.ORDER_BUTTON_BOTTOM))
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
-        button.click()
+        self.click(self.ORDER_BUTTON_BOTTOM)
 
     @allure.step("Заполнение формы «Для кого» (имя: {name}, фамилия: {surname})")
     def fill_order_form_for_whom(self, name, surname, address, station, phone):
         # Заполняет первую форму заказа для кого
-        name_field = self.wait.until(EC.visibility_of_element_located(self.NAME_FIELD))
-        name_field.send_keys(name)
-
-        surname_field = self.driver.find_element(*self.SURNAME_FIELD)
-        surname_field.send_keys(surname)
-
-        address_field = self.driver.find_element(*self.ADDRESS_FIELD)
-        address_field.send_keys(address)
+        self.type(self.NAME_FIELD, name)
+        self.type(self.SURNAME_FIELD, surname)
+        self.type(self.ADDRESS_FIELD, address)
 
         station_field = self.driver.find_element(*self.STATION_FIELD)
         station_field.send_keys(station)
         option = self.wait.until(EC.element_to_be_clickable(self.STATION_ITEM))
         option.click()
 
-        phone_field = self.driver.find_element(*self.PHONE_FIELD)
-        phone_field.send_keys(phone)
+        self.type(self.PHONE_FIELD, phone)
         # Нажимает кнопку Далее
-        next_button = self.driver.find_element(*self.NEXT_BUTTON)
-        next_button.click()
+        self.click(self.NEXT_BUTTON)
 
     @allure.step("Заполнение формы «Аренда» (дата: {data}, длительность: {duration})")
     def fill_order_form_rent(self, data, duration):
         # Заполняет вторую форму заказа Аренда
-        data_field = self.driver.find_element(*self.DATA_FIELD)
-        data_field.send_keys(data)
-
-        duration_list = self.wait.until(EC.element_to_be_clickable(self.DURATION_DROPDOWN))
-        duration_list.click()
-
-        duration_option = self.driver.find_element(*self.DURATION_OPTION)
-        duration_option.click()
+        self.type(self.DATA_FIELD, data)
+        self.click(self.DURATION_DROPDOWN)
+        self.click(self.DURATION_OPTION)
+        
         # Нажимает кнопку Заказать
-        order_button = self.wait.until(EC.element_to_be_clickable(self.ORDER_BUTTON_MIDDLE))
-        import time
-        time.sleep(2)
-        order_button.click()
+        self.click(self.ORDER_BUTTON_MIDDLE)
 
     @allure.step("Подтверждение заказа (нажатие кнопки «Да»)")
     def answer_order_question(self):
-        # Нажимает кнопку Да в окне подтверждения заказа
-        yes = self.wait.until(EC.element_to_be_clickable(self.YES_BUTTON))
-        yes.click()
+        self.click(self.YES_BUTTON)
 
     @allure.step("Проверка отображения сообщения об успешном заказе")
     def is_success_message_displayed(self):
         # Проверяет отображение сообщения об успешном заказе
         try:
-            self.wait.until(EC.visibility_of_element_located(self.SUCCESS_MESSAGE))
+            self.get_visibility(self.SUCCESS_MESSAGE)
             return True
         except:
             return False
@@ -107,14 +86,12 @@ class OrderPage:
     @allure.step("Клик на логотип Самоката")
     def click_scooter_logo(self):
         # Кликает на логотип Самоката
-        logo = self.wait.until(EC.element_to_be_clickable(self.LOGO_SCOOTER))
-        self.driver.execute_script("arguments[0].click();", logo)
+        self.click_script(self.LOGO_SCOOTER)
 
     @allure.step("Клик на логотип Яндекса")
     def click_yandex_logo(self):
         # Кликает на логотип Яндекса
-        logo = self.wait.until(EC.element_to_be_clickable(self.LOGO_YANDEX))
-        logo.click()
+        self.click(self.LOGO_YANDEX)
 
     @allure.step("Получение текущего URL страницы")
     def get_current_url(self):

@@ -2,17 +2,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import allure
+from pages.base_page import BasePage
+from curl import BASE_URL
 
-class MainPage:
+class MainPage(BasePage):
     
-    def __init__(self, driver):
-        self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
-        self.base_url = "https://qa-scooter.praktikum-services.ru/"
-
     @allure.step("Открытие главной страницы")
-    def open(self):
-        self.driver.get(self.base_url)
+    def open_main_page(self):
+        self.open(BASE_URL)
 
     # Локаторы для раздела class = 'accordion'
     ACCORDION_SECTION = (By.CLASS_NAME, "accordion")
@@ -22,12 +19,14 @@ class MainPage:
 
     @allure.step("Поиск секции аккордеона на странице")
     def get_accordion_section(self):
-        return self.wait.until(EC.presence_of_element_located(self.ACCORDION_SECTION))
+        accordion_section = self.find(self.ACCORDION_SECTION)
+        return accordion_section
 
     @allure.step("Получение списка всех вопросов в секции аккордеона")
     def get_all_questions(self):
         accordion = self.get_accordion_section()
-        return accordion.find_elements(*self.QUESTION_ITEMS)
+        question_items = self.driver.find_elements(*self.QUESTION_ITEMS)
+        return question_items
 
     @allure.step("Клик по вопросу №{question_index} в секции 'Вопросы о важном'")
     def click_question(self, question_index):
@@ -46,5 +45,7 @@ class MainPage:
             self.click_question(question_index)
             answer_element = questions[question_index].find_element(*self.ANSWER_CONTENT)
             self.wait.until(EC.visibility_of(answer_element))
+            
             return answer_element.text.strip()
+
         return ""

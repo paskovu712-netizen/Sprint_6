@@ -25,7 +25,7 @@ class MainPage(BasePage):
     @allure.step("Получение списка всех вопросов в секции аккордеона")
     def get_all_questions(self):
         accordion = self.get_accordion_section()
-        question_items = self.driver.find_elements(*self.QUESTION_ITEMS)
+        question_items = self.find_all(self.QUESTION_ITEMS)
         return question_items
 
     @allure.step("Клик по вопросу №{question_index} в секции 'Вопросы о важном'")
@@ -33,8 +33,7 @@ class MainPage(BasePage):
         questions = self.get_all_questions()
         if 0 <= question_index < len(questions):
             question = questions[question_index]
-            self.driver.execute_script("document.body.style.zoom='50%'")
-            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", question)
+            self.focus_script(question)
             self.wait.until(EC.element_to_be_clickable(question))
             question.find_element(*self.QUESTION_TITLE).click()
 

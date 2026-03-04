@@ -34,14 +34,12 @@ class OrderPage(BasePage):
 
     @allure.step("Нажатие кнопки «Заказать» вверху страницы")
     def click_order_button_top(self):
-        # Нажимает кнопку «Заказать» вверху страницы
-        self.driver.execute_script("document.body.style.zoom='50%'")
+        self.zoom50_script()
         self.click(self.ORDER_BUTTON_TOP)
 
     @allure.step("Нажатие кнопки «Заказать» внизу страницы")
     def click_order_button_bottom(self):
-        # Нажимает кнопку «Заказать» внизу страницы
-        self.driver.execute_script("document.body.style.zoom='50%'")
+        self.zoom50_script()
         self.click(self.ORDER_BUTTON_BOTTOM)
 
     @allure.step("Заполнение формы «Для кого» (имя: {name}, фамилия: {surname})")
@@ -50,12 +48,8 @@ class OrderPage(BasePage):
         self.type(self.NAME_FIELD, name)
         self.type(self.SURNAME_FIELD, surname)
         self.type(self.ADDRESS_FIELD, address)
-
-        station_field = self.driver.find_element(*self.STATION_FIELD)
-        station_field.send_keys(station)
-        option = self.wait.until(EC.element_to_be_clickable(self.STATION_ITEM))
-        option.click()
-
+        self.type(self.STATION_FIELD, station)
+        self.click(self.STATION_ITEM)
         self.type(self.PHONE_FIELD, phone)
         # Нажимает кнопку Далее
         self.click(self.NEXT_BUTTON)
@@ -66,7 +60,6 @@ class OrderPage(BasePage):
         self.type(self.DATA_FIELD, data)
         self.click(self.DURATION_DROPDOWN)
         self.click(self.DURATION_OPTION)
-        
         # Нажимает кнопку Заказать
         self.click(self.ORDER_BUTTON_MIDDLE)
 
@@ -93,14 +86,3 @@ class OrderPage(BasePage):
         # Кликает на логотип Яндекса
         self.click(self.LOGO_YANDEX)
 
-    @allure.step("Получение текущего URL страницы")
-    def get_current_url(self):
-        # Возвращает текущий URL
-        return self.driver.current_url
-
-    @allure.step("Переключение на новое окно браузера")
-    def switch_to_new_window(self):
-        # Переключается на новое окно браузера
-        self.driver.switch_to.window(self.driver.window_handles[-1])
-        import time
-        time.sleep(2)
